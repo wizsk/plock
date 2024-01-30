@@ -21,8 +21,8 @@ type app struct {
 
 	waitForUserInput bool
 	// next is the intermission
-	nextInerm bool
-	ticker    *time.Ticker
+	nextInterm bool
+	ticker     *time.Ticker
 }
 
 func (a *app) currSession() string {
@@ -68,19 +68,19 @@ func (a *app) pollEvent() {
 }
 
 func newTimmer() app {
-	dur, _ := time.ParseDuration("2s")
+	dur, _ := time.ParseDuration("9s")
 	return app{
 		session: 1,
 
 		current: dur,
 		timmer:  dur,
 		// intermission: 5 * time.Minute,
-		intermission: 1 * time.Second,
+		intermission: 5 * time.Second,
 
-		queues:    make(chan termbox.Event),
-		paused:    false,
-		nextInerm: true,
-		ticker:    time.NewTicker(time.Second),
+		queues:     make(chan termbox.Event),
+		paused:     false,
+		nextInterm: true,
+		ticker:     time.NewTicker(time.Second),
 	}
 }
 
@@ -91,9 +91,8 @@ func main() {
 	defer termbox.Close()
 	a := newTimmer()
 	go a.pollEvent()
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+	clearT()
 	putText("Starting....", positionMiddle, termbox.ColorDefault+termbox.AttrBold)
-	// putTime(a.formatDuration())
 	flush()
 
 loop:
@@ -102,36 +101,47 @@ loop:
 		case ev := <-a.queues:
 			if isQuit(ev) {
 				break loop
+			} else if ev.Ch == 'n' || ev.Ch == 's' {
+				clearT()
+				if !a.nextInterm {
+					putText(fmt.Sprintf("Session %d skipped...", a.session), positionMiddle, termbox.ColorGreen+termbox.AttrBold)
+					a.current = a.timmer
+					a.session++
+				} else {
+					putText("Break skipped...", positionMiddle, termbox.ColorGreen+termbox.AttrBold)
+					a.current = a.intermission
+				}
+				flush()
+				a.nextInterm = !a.nextInterm
+				time.Sleep(800 * time.Millisecond)
+
 			} else if ev.Key == termbox.KeySpace {
+				clearT()
 				a.paused = !a.paused
 				if a.paused {
-					clearT()
-					if !a.nextInerm {
-						putText(a.nextSession(), positionButtom, termbox.ColorLightBlue+termbox.AttrBold)
-					} else {
-						putText(a.currSession(), positionButtom, termbox.ColorYellow+termbox.AttrBold)
-					}
 					putTime(a.formatDuration())
-					putText("Paused", positionTop, termbox.ColorLightRed+termbox.AttrBold)
-					flush()
+					putText("Paused", positionButtom, termbox.ColorLightRed+termbox.AttrBold)
 					a.ticker.Stop()
 				} else {
+					putText("Resuming...", positionMiddle, termbox.ColorLightGreen+termbox.AttrBold)
 					a.ticker.Reset(time.Second)
 				}
+				flush()
+
 			}
 
 		case <-a.ticker.C:
 			clearT()
 			putTime(a.formatDuration())
 			a.current -= time.Second
-			if !a.nextInerm {
+			if !a.nextInterm {
 				putText(a.nextSession(), positionButtom, termbox.ColorLightBlue+termbox.AttrBold)
 			} else {
 				putText(a.currSession(), positionButtom, termbox.ColorYellow+termbox.AttrBold)
 			}
 			flush()
 			if a.current == 0 {
-				if a.nextInerm {
+				if a.nextInterm {
 					a.current = a.intermission
 				} else {
 					a.current = a.timmer
@@ -144,11 +154,10 @@ loop:
 					}
 
 				}
-				a.nextInerm = !a.nextInerm
+				a.nextInterm = !a.nextInterm
 			}
 		}
 	}
-
 }
 
 func isQuit(ev termbox.Event) bool {
