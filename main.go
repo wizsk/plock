@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/exec"
+	"runtime"
 	"time"
 
 	"github.com/nsf/termbox-go"
@@ -67,15 +71,33 @@ func (a *app) pollEvent() {
 	}
 }
 
-func newTimmer() app {
-	dur, _ := time.ParseDuration("9s")
+func newTimmer(duration, interm string) app {
+	if duration == "" {
+		duration = "45m"
+	}
+
+	if interm == "" {
+		interm = "10m"
+	}
+
+	var dur, in time.Duration
+	var err error
+
+	if dur, err = time.ParseDuration(duration); err != nil {
+		panic(err)
+	}
+
+	if in, err = time.ParseDuration(interm); err != nil {
+		panic(err)
+	}
+
 	return app{
 		session: 1,
 
 		current: dur,
 		timmer:  dur,
 		// intermission: 5 * time.Minute,
-		intermission: 5 * time.Second,
+		intermission: in,
 
 		queues:     make(chan termbox.Event),
 		paused:     false,
@@ -84,12 +106,43 @@ func newTimmer() app {
 	}
 }
 
+func notify(heading, description string) {
+	if runtime.GOOS != "linux" {
+		return
+	}
+	cmd := exec.Command("notify-send", heading, description)
+	cmd.Run()
+}
+
+func playSound(ctx context.Context) {
+	d := make(chan struct{})
+	cmd := exec.Command("mpv", "--loop=2", "noti.m4a")
+
+	go func(cmd *exec.Cmd, done chan<- struct{}) {
+		if err := cmd.Start(); err != nil {
+			panic(err)
+		}
+		d <- struct{}{}
+		cmd.Wait()
+		d <- struct{}{}
+	}(cmd, d)
+	<-d
+
+	select {
+	case <-ctx.Done():
+		cmd.Process.Kill()
+	case <-d:
+		return
+	}
+}
+
 func main() {
 	if err := termbox.Init(); err != nil {
 		panic(err)
 	}
 	defer termbox.Close()
-	a := newTimmer()
+
+	a := newTimmer(os.Args[1], os.Args[2])
 	go a.pollEvent()
 	clearT()
 	putText("Starting....", positionMiddle, termbox.ColorDefault+termbox.AttrBold)
@@ -142,17 +195,25 @@ loop:
 			flush()
 			if a.current == 0 {
 				if a.nextInterm {
+					ctx, c := context.WithCancel(context.Background())
+					defer c()
+					go playSound(ctx)
+					go notify(fmt.Sprintf("Session %d done", a.session), "Go do some exercise")
 					a.current = a.intermission
 				} else {
 					a.current = a.timmer
 					a.session++
+					ctx, cancl := context.WithCancel(context.Background())
+					go playSound(ctx)
+					go notify("Break finised", "Comeback and contine working")
 					clearT()
 					putText("Press any key to continue or q to quit...", positionMiddle, termbox.ColorLightRed+termbox.AttrBold)
 					flush()
 					if ev := <-a.queues; isQuit(ev) {
+						cancl()
 						break loop
 					}
-
+					cancl()
 				}
 				a.nextInterm = !a.nextInterm
 			}
