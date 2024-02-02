@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -21,6 +20,10 @@ type app struct {
 	// next is the intermission
 	nextInterm bool
 	ticker     *time.Ticker
+
+	lastInput time.Time
+
+	notiPath string // if it is "" then no path provided
 }
 
 // returns: Session: X
@@ -49,18 +52,9 @@ func flush() {
 	}
 }
 
-// formatDuration formats the app.current to "MM:SS" or "HH:MM:SS"
+// formatDuration calls durationToStr func
 func (a *app) formatDuration() string {
-	d := a.current.Round(time.Second)
-	h := d / time.Hour
-	d -= h * time.Hour
-	m := d / time.Minute
-	d -= m * time.Minute
-	s := d / time.Second
-	if h > 0 {
-		return fmt.Sprintf("%02d:%02d:%02d", h, m, s)
-	}
-	return fmt.Sprintf("%02d:%02d", m, s)
+	return durationToStr(a.current)
 }
 
 // getPollEvents gets the pulls form termbox.PollEvent and puths them to app.queues
@@ -70,6 +64,12 @@ func (a *app) getPollEvents() {
 	for {
 		a.queues <- termbox.PollEvent()
 	}
+}
+
+const inputDelay time.Duration = 500 * time.Microsecond
+
+func (a *app) inputDelayOK() bool {
+	return time.Now().Sub(a.lastInput) < inputDelay
 }
 
 func newTimmer(duration, interm string) app {
@@ -100,11 +100,13 @@ func newTimmer(duration, interm string) app {
 		paused:     false,
 		nextInterm: true,
 		ticker:     time.NewTicker(time.Second),
+
+		notiPath: writeNoti(),
 	}
 }
 
-func runPomodoro() {
-	a := newTimmer("1s", "1s")
+func runPomodoro(timer, interm string) {
+	a := newTimmer(timer, interm)
 	go a.getPollEvents()
 
 	clearT()
@@ -115,6 +117,10 @@ loop:
 	for {
 		select {
 		case ev := <-a.queues:
+			if a.inputDelayOK() {
+				continue loop
+			}
+
 			if isQuit(ev) {
 				break loop
 			} else if ev.Ch == 'n' || ev.Ch == 's' {
@@ -143,10 +149,35 @@ loop:
 					a.ticker.Reset(time.Second)
 				}
 				flush()
-
 			}
+			a.lastInput = time.Now()
 
 		case <-a.ticker.C:
+			if a.current == 0 {
+				if a.nextInterm {
+					go playSound(a.notiPath)
+					go notify(fmt.Sprintf("Session %d done", a.session), "Go do some exercise")
+					a.current = a.intermission
+					a.nextInterm = false
+
+				} else {
+					a.current = a.timmer
+					a.session++
+					go notify("Break finised", "Comeback and contine working")
+					clearT()
+					putText("Press any key to continue or q to quit...", positionMiddle, termbox.ColorLightRed+termbox.AttrBold)
+					flush()
+					go playSound(a.notiPath)
+
+					if ev := <-a.queues; isQuit(ev) {
+						break loop
+					}
+
+					a.nextInterm = true
+					continue loop
+				}
+			}
+
 			clearT()
 			putTime(a.formatDuration())
 			a.current -= time.Second
@@ -156,33 +187,6 @@ loop:
 				putText(a.printCurrSession(), positionButtom, termbox.ColorYellow+termbox.AttrBold)
 			}
 			flush()
-			if a.current == 0 {
-				if a.nextInterm {
-					ctx, stopSound := context.WithCancel(context.Background())
-					go playSound(ctx)
-					defer func() {
-						stopSound()
-					}()
-					go notify(fmt.Sprintf("Session %d done", a.session), "Go do some exercise")
-					a.current = a.intermission
-
-				} else {
-					a.current = a.timmer
-					a.session++
-					ctx, cancl := context.WithCancel(context.Background())
-					go playSound(ctx)
-					go notify("Break finised", "Comeback and contine working")
-					clearT()
-					putText("Press any key to continue or q to quit...", positionMiddle, termbox.ColorLightRed+termbox.AttrBold)
-					flush()
-					if ev := <-a.queues; isQuit(ev) {
-						cancl()
-						break loop
-					}
-					cancl()
-				}
-				a.nextInterm = !a.nextInterm
-			}
 		}
 	}
 }
