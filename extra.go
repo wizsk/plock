@@ -36,7 +36,7 @@ loop:
 	}
 }
 
-func stopWatch() {
+func timer() {
 	queues := make(chan termbox.Event)
 	go func() {
 		for {

@@ -19,16 +19,18 @@ const usages string = `Usage of clock [pomodoro_time break_time]:
 `
 
 func main() {
-	var timer, interm string
+	var timerLen, interm string
 	var clcokMode, timerMode bool
 	flag.BoolVar(&clcokMode, "c", false, "clock mode")
 	flag.BoolVar(&timerMode, "t", false, "timer mode or count up form 0 seconds")
-	flag.StringVar(&timer, "p", "45m", "pomodoro timer length")
+	flag.StringVar(&timerLen, "p", "45m", "pomodoro timer length")
 	flag.StringVar(&interm, "b", "10m", "break length")
 	flag.Usage = func() { fmt.Print(usages) }
 	flag.Parse()
 
-	warnAboutDependencies()
+	if !(clcokMode || timerMode) {
+		warnAboutDependencies()
+	}
 
 	// initializing the terminal
 	if err := termbox.Init(); err != nil {
@@ -44,15 +46,15 @@ func main() {
 	}
 
 	if timerMode {
-		stopWatch()
+		timer()
 		return
 	}
 
 	args := flag.Args()
 	if len(args) >= 2 {
-		timer = args[0]
+		timerLen = args[0]
 		interm = args[1]
 	}
 
-	runPomodoro(timer, interm)
+	runPomodoro(timerLen, interm)
 }
