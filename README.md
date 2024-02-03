@@ -19,6 +19,6 @@ Usage of plock [pomodoro_time break_time]:
         break length (default "10m")
   -c
         clock mode
-  -s
-        stopwatch or count up
+  -t
+	timer mode or count up form 0 seconds
 ```

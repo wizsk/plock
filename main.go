@@ -14,15 +14,15 @@ const usages string = `Usage of clock [pomodoro_time break_time]:
 	break length (default "10m")
   -c
 	clock mode
-  -s
-	stopwatch or count up
+  -t
+	timer mode or count up form 0 seconds
 `
 
 func main() {
 	var timer, interm string
-	var clcokMode, stopWatchMode bool
+	var clcokMode, timerMode bool
 	flag.BoolVar(&clcokMode, "c", false, "clock mode")
-	flag.BoolVar(&stopWatchMode, "s", false, "stopwatch or count up")
+	flag.BoolVar(&timerMode, "t", false, "timer mode or count up form 0 seconds")
 	flag.StringVar(&timer, "p", "45m", "pomodoro timer length")
 	flag.StringVar(&interm, "b", "10m", "break length")
 	flag.Usage = func() { fmt.Print(usages) }
@@ -43,7 +43,7 @@ func main() {
 		return
 	}
 
-	if stopWatchMode {
+	if timerMode {
 		stopWatch()
 		return
 	}
