@@ -20,6 +20,11 @@ const notificationFileName string = "notification_sound.mp3"
 var files embed.FS
 
 func writeNoti() string {
+	// if there is no mpv just skip writing sounds
+	if _, err := exec.LookPath("mpv"); err != nil {
+		return ""
+	}
+
 	path := filepath.Join(os.TempDir(), notificationFileName)
 	if _, err := os.Stat(path); err == nil {
 		return path
@@ -41,6 +46,18 @@ func writeNoti() string {
 		return ""
 	}
 	return f.Name()
+}
+
+func warnAboutDependencies() {
+	const cmdNotFound = "command %q not found, please install it to get %s\n"
+	if _, err := exec.LookPath("mpv"); err != nil {
+		fmt.Fprintf(os.Stderr, cmdNotFound, "mpv", "allart sounds")
+	}
+	if runtime.GOOS == "linux" {
+		if _, err := exec.LookPath("notify-send"); err != nil {
+			fmt.Fprintf(os.Stderr, cmdNotFound, "notify-send", "notifications")
+		}
+	}
 }
 
 func isQuit(ev termbox.Event) bool {

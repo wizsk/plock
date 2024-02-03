@@ -2,9 +2,21 @@ package main
 
 import (
 	"flag"
+	"fmt"
 
 	"github.com/nsf/termbox-go"
 )
+
+const usages string = `Usage of clock [pomodoro_time break_time]:
+  -p
+	pomodoro timer length (default "45m")
+  -b
+	break length (default "10m")
+  -c
+	clock mode
+  -s
+	stopwatch or count up
+`
 
 func main() {
 	var timer, interm string
@@ -13,7 +25,10 @@ func main() {
 	flag.BoolVar(&stopWatchMode, "s", false, "stopwatch or count up")
 	flag.StringVar(&timer, "p", "45m", "pomodoro timer length")
 	flag.StringVar(&interm, "b", "10m", "break length")
+	flag.Usage = func() { fmt.Print(usages) }
 	flag.Parse()
+
+	warnAboutDependencies()
 
 	// initializing the terminal
 	if err := termbox.Init(); err != nil {
@@ -21,6 +36,7 @@ func main() {
 	}
 	termbox.HideCursor()
 	defer termbox.Close()
+	defer termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 
 	if clcokMode {
 		clock()
