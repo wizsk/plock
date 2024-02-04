@@ -29,7 +29,7 @@ loop:
 			lastInput = inputTime
 		case t := <-ticker.C:
 			clearT()
-			putTime(t.Format("03:04:05 PM"))
+			putTime(t.Format(timeFormat))
 			flush()
 		}
 
@@ -61,7 +61,7 @@ loop:
 		case <-ticker.C:
 			clearT()
 			putTime(durationToStr(duration))
-			putText(time.Now().Format("03:04:05 PM"), positionButtom, termbox.ColorBlue+termbox.AttrBold)
+			putText(time.Now().Format(timeFormat), positionButtom, termbox.ColorBlue+termbox.AttrBold)
 			duration += time.Second
 			flush()
 		}

@@ -18,8 +18,9 @@ type app struct {
 	paused           bool
 	waitForUserInput bool
 	// next is the intermission
-	nextInterm bool
-	ticker     *time.Ticker
+	nextInterm    bool
+	showFinisesAt bool
+	ticker        *time.Ticker
 
 	lastInput time.Time
 
@@ -72,7 +73,7 @@ func (a *app) inputDelayOK() bool {
 	return time.Now().Sub(a.lastInput) < inputDelay
 }
 
-func newTimmer(duration, interm string) app {
+func newTimmer(duration, interm string, showEndTime bool) app {
 	if duration == "" {
 		duration = "45m"
 	}
@@ -96,17 +97,18 @@ func newTimmer(duration, interm string) app {
 		timmer:       dur,
 		intermission: in,
 
-		queues:     make(chan termbox.Event),
-		paused:     false,
-		nextInterm: true,
-		ticker:     time.NewTicker(time.Second),
+		queues:        make(chan termbox.Event),
+		paused:        false,
+		nextInterm:    true,
+		showFinisesAt: showEndTime,
+		ticker:        time.NewTicker(time.Second),
 
 		notiPath: writeNoti(),
 	}
 }
 
-func runPomodoro(timer, interm string) {
-	a := newTimmer(timer, interm)
+func runPomodoro(timer, interm string, showEndTime bool) {
+	a := newTimmer(timer, interm, showEndTime)
 	go a.getPollEvents()
 
 	clearT()
@@ -179,6 +181,9 @@ loop:
 			}
 
 			clearT()
+			if a.showFinisesAt {
+				putText("Ends at: "+time.Now().Add(a.current).Format(timeFormat), positionButtomP1, termbox.ColorDarkGray+termbox.AttrBold)
+			}
 			putTime(a.formatDuration())
 			a.current -= time.Second
 			if !a.nextInterm {

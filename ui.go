@@ -46,6 +46,7 @@ const (
 	positionTop = iota
 	positionMiddle
 	positionButtom
+	positionButtomP1 // y + 1 down
 )
 
 func putText(t string, p position, color termbox.Attribute) {
@@ -58,6 +59,8 @@ func putText(t string, p position, color termbox.Attribute) {
 		y /= 2
 	case positionButtom:
 		y = y * 3 / 4
+	case positionButtomP1:
+		y = (y * 3 / 4) + 1
 	default:
 		return
 	}

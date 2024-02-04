@@ -7,6 +7,8 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+const timeFormat string = "03:04:05 PM"
+
 const usages string = `Usage of clock [pomodoro_time break_time]:
   -p
 	pomodoro timer length (default "45m")
@@ -16,13 +18,16 @@ const usages string = `Usage of clock [pomodoro_time break_time]:
 	clock mode
   -t
 	timer mode or count up form 0 seconds
+  -e
+	don't show "Ends at:"
 `
 
 func main() {
 	var timerLen, interm string
-	var clcokMode, timerMode bool
+	var clcokMode, timerMode, showEndTime bool
 	flag.BoolVar(&clcokMode, "c", false, "clock mode")
 	flag.BoolVar(&timerMode, "t", false, "timer mode or count up form 0 seconds")
+	flag.BoolVar(&showEndTime, "e", false, "don't show ends at")
 	flag.StringVar(&timerLen, "p", "45m", "pomodoro timer length")
 	flag.StringVar(&interm, "b", "10m", "break length")
 	flag.Usage = func() { fmt.Print(usages) }
@@ -56,5 +61,5 @@ func main() {
 		interm = args[1]
 	}
 
-	runPomodoro(timerLen, interm)
+	runPomodoro(timerLen, interm, !showEndTime)
 }
