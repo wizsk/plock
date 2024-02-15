@@ -128,11 +128,11 @@ loop:
 			} else if ev.Ch == 'n' || ev.Ch == 's' {
 				clearT()
 				if !a.nextInterm {
-					putText(fmt.Sprintf("Session %d skipped...", a.session), positionMiddle, termbox.ColorGreen+termbox.AttrBold)
+					putText("Break skipped...", positionMiddle, termbox.ColorGreen+termbox.AttrBold)
 					a.current = a.timmer
 					a.session++
 				} else {
-					putText("Break skipped...", positionMiddle, termbox.ColorGreen+termbox.AttrBold)
+					putText(fmt.Sprintf("Session %d skipped...", a.session), positionMiddle, termbox.ColorGreen+termbox.AttrBold)
 					a.current = a.intermission
 				}
 				flush()

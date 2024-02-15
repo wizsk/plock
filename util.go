@@ -66,7 +66,7 @@ func isQuit(ev termbox.Event) bool {
 
 func notify(heading, description string) {
 	if runtime.GOOS == "linux" {
-		cmd := exec.Command("notify-send", heading, description)
+		cmd := exec.Command("notify-send", "--wait", heading, description)
 		cmd.Run()
 	}
 }
