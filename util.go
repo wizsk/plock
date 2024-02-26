@@ -14,9 +14,9 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
-const notificationFileName string = "notification_sound.mp3"
+const notificationFileName string = "notification_sound.m4a"
 
-//go:embed notification_sound.mp3
+//go:embed notification_sound.m4a
 var files embed.FS
 
 func writeNoti() string {
@@ -66,7 +66,7 @@ func isQuit(ev termbox.Event) bool {
 
 func notify(heading, description string) {
 	if runtime.GOOS == "linux" {
-		cmd := exec.Command("notify-send", "--wait", heading, description)
+		cmd := exec.Command("notify-send", "--wait", "--urgency=critical", heading, description)
 		cmd.Run()
 	}
 }

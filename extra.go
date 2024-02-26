@@ -49,6 +49,8 @@ func timer(limit time.Duration) {
 	lastInput := time.Now()
 	ticker := time.NewTicker(time.Second)
 	duration := time.Duration(0)
+	end := time.Now().Add(limit)
+	paused := false
 
 loop:
 	for {
@@ -60,18 +62,41 @@ loop:
 					break loop
 				} else if ev.Ch == 'r' || ev.Ch == 'R' {
 					duration = time.Duration(0)
+					clearT()
+					putText("Reseting...", positionMiddle, termbox.ColorRed+termbox.AttrBold)
+					flush()
+				} else if ev.Key == termbox.KeySpace {
+					paused = !paused
+					if paused {
+						clearT()
+						putTime(durationToStr(duration))
+						putText("Paused", positionButtom, termbox.AttrBold+termbox.ColorRed)
+						flush()
+					} else {
+						end = time.Now().Add(limit - duration)
+					}
 				}
 			}
 			lastInput = inputTime
 		case <-ticker.C:
+			if paused {
+				continue loop
+			}
 			clearT()
 			putTime(durationToStr(duration))
-			putText(time.Now().Format(timeFormat), positionButtom, termbox.ColorBlue+termbox.AttrBold)
+			putText( /* "Current time: "+ */ time.Now().Format(timeFormat), positionButtom, termbox.ColorDarkGray+termbox.AttrBold)
+			if limit != 0 {
+				putText(
+					fmt.Sprintf("Timmer ends: %s", end.Format(timeFormat)),
+					positionButtomP1,
+					termbox.ColorDarkGray+termbox.AttrBold,
+				)
+			}
 			duration += time.Second
 			flush()
 
 			if limit != 0 && duration > limit {
-				go notify("Time out", fmt.Sprintf("The timmer set for %s is finished", limit.String()))
+				go notify("Time out", fmt.Sprintf("%s is over", limit.String()))
 				go playSound(writeNoti())
 				time.Sleep(1 * time.Second)
 				break loop

@@ -11,6 +11,9 @@ all: curr linuxStatic linuxArm64 winAmd64
 curr:
 	go build -ldflags "-s -w" -o build/clock
 
+install:
+	@echo "Installing in to the system"
+	@go install -ldflags "-s -w"
 linuxStatic:
 	@echo "[+] Building the static Linux version"
 	@env GOOS=linux CGO_ENABLED=0 go build -ldflags "-s -w" -o build/clock.static
