@@ -32,8 +32,9 @@ loop:
 		flush()
 		select {
 		case ev := <-q:
-			isQuit(ev)
-			break loop
+			if isQuit(ev) {
+				break loop
+			}
 		}
 	}
 }
