@@ -2,14 +2,17 @@
 
 It is a small cli app for pomodoro sessions. It hast a clock and timmer build in.
 
-# install by building from the main branch
+## install by building from the main branch
 
 ```bash
 # getting rid of the debug informations with ldflags
 go install -ldflags "-s -w" github.com/wizsk/plock@latest
 ```
 
-# usages
+## usages
+
+**provide time** in `2h3m4s` this format.
+
 ```
 promt> plock --help
 Usage of plock [<session len> <break>] [OPTIONS..]:
@@ -24,6 +27,7 @@ OPTIONS:
   -e  don't show "Ends at: "03:04:05 PM
 ```
 
-## TODO
 
-- [ ] skip label
+## Special Thanks
+
+- [countdown](https://github.com/antonmedv/countdown) - for the inspiration
