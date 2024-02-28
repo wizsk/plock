@@ -7,6 +7,37 @@ import (
 	"github.com/nsf/termbox-go"
 )
 
+const pomodoroHelpTexts string = `Help: <press q to quit>
+s   n    *  skip the current session
+q        *  quit
+<space>  *  skip the current session pause
+h   H    *  for help text
+`
+
+func ph(q <-chan termbox.Event) {
+loop:
+	for {
+		y := 0
+		x := 0
+		clearT()
+		for _, r := range pomodoroHelpTexts {
+			if r == '\n' {
+				y++
+				x = 0
+				continue
+			}
+			termbox.SetCell(x, y, r, termbox.ColorDefault, termbox.ColorDefault)
+			x++
+		}
+		flush()
+		select {
+		case ev := <-q:
+			isQuit(ev)
+			break loop
+		}
+	}
+}
+
 type app struct {
 	session uint
 	// remaining time
@@ -124,8 +155,22 @@ loop:
 			}
 
 			if isQuit(ev) {
+				if !confirm(a.queues, "Do you really want to quit?") {
+					continue loop
+				}
+
 				break loop
+			} else if ev.Ch == 'H' || ev.Ch == 'h' {
+				ph(a.queues)
 			} else if ev.Ch == 'n' || ev.Ch == 's' {
+				next := "the break?"
+				if a.nextInterm {
+					next = "the session?"
+				}
+				if !confirm(a.queues, "Do you really want to skip "+next+" remaining: "+a.current.String()) {
+					continue loop
+				}
+
 				clearT()
 				if !a.nextInterm {
 					putText("Break skipped...", positionMiddle, termbox.ColorGreen+termbox.AttrBold)
