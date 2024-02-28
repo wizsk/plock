@@ -11,7 +11,7 @@ import (
 
 const (
 	timeFormat string = "03:04:05 PM"
-	version    string = "1.0"
+	version    string = "1.1"
 )
 
 const usages string = `Usage of plock [<session len> <break>] [OPTIONS..]:
