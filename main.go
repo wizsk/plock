@@ -23,7 +23,7 @@ OPTIONS:
   -c  clock mode
   -t  timer mode or count up form 0 seconds
   -u  timer mode or count up form 0 seconds until specified time. eg. 1m30s
-  -e  don't show "Ends at: "` + timeFormat + `
+  -e  don't show "Ends at: ` + timeFormat + `"
 `
 
 func usage() {
