@@ -9,7 +9,7 @@ all: curr linuxStatic linuxArm64 winAmd64
 # 	sed -i 's/const debug = false/const debug = !false/' main.go
 
 curr:
-	go build -ldflags "-s -w" -o build/clock
+	go build -ldflags "-s -w" -o build/
 
 install:
 	@echo "Installing in to the system"
