@@ -30,11 +30,9 @@ loop:
 			x++
 		}
 		flush()
-		select {
-		case ev := <-q:
-			if isQuit(ev) {
-				break loop
-			}
+		ev := <-q
+		if isQuit(ev) {
+			break loop
 		}
 	}
 }
@@ -102,7 +100,7 @@ func (a *app) getPollEvents() {
 const inputDelay time.Duration = 500 * time.Microsecond
 
 func (a *app) inputDelayOK() bool {
-	return time.Now().Sub(a.lastInput) < inputDelay
+	return time.Since(a.lastInput) < inputDelay
 }
 
 func newTimmer(duration, interm string, showEndTime bool) app {
