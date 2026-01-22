@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/nsf/termbox-go"
@@ -95,4 +96,27 @@ func durationToStr(d time.Duration) string {
 		return fmt.Sprintf("%02d:%02d:%02d", h, m, s)
 	}
 	return fmt.Sprintf("%02d:%02d", m, s)
+}
+
+// form: https://github.com/antonmedv/countdown main.go:205
+func parseTime(date string) (time.Duration, error) {
+	targetTime, err := time.Parse(time.Kitchen, strings.ToUpper(date))
+	if err != nil {
+		targetTime, err = time.Parse("15:04", date)
+		if err != nil {
+			return time.Duration(0), err
+		}
+	}
+
+	now := time.Now()
+	originTime := time.Date(0, time.January, 1, now.Hour(), now.Minute(), now.Second(), 0, time.UTC)
+
+	// The time of day has already passed, so target tomorrow.
+	if targetTime.Before(originTime) {
+		targetTime = targetTime.AddDate(0, 0, 1)
+	}
+
+	duration := targetTime.Sub(originTime)
+
+	return duration, err
 }

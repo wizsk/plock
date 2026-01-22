@@ -11,7 +11,7 @@ import (
 
 const (
 	timeFormat string = "03:04:05 PM"
-	version    string = "1.1"
+	version    string = "1.2"
 )
 
 const usages string = `Usage of plock [<session len> <break>] [OPTIONS..]:
@@ -22,7 +22,7 @@ OPTIONS:
   -b  break length (default "10m")
   -c  clock mode
   -t  timer mode or count up form 0 seconds
-  -u  timer mode or count up form 0 seconds until specified time. eg. 1m30s
+  -u  timer mode or count up form 0 seconds until specified time. eg. (1m30s, 3:04PM or 15:04)
   -e  don't show "Ends at: ` + timeFormat + `"
   -s  silence no notifications or sounds
 `
@@ -79,11 +79,15 @@ func main() {
 	if timerCountUntil != "" {
 		d, err := time.ParseDuration(timerCountUntil)
 		if err != nil {
+			d, err = parseTime(timerCountUntil)
+		}
+		if err != nil {
 			termbox.Close()
 			fmt.Println(err)
 			fmt.Println()
 			usage()
 		}
+
 		timer(d)
 		return
 	}
