@@ -24,12 +24,15 @@ OPTIONS:
   -t  timer mode or count up form 0 seconds
   -u  timer mode or count up form 0 seconds until specified time. eg. 1m30s
   -e  don't show "Ends at: ` + timeFormat + `"
+  -s  silence no notifications or sounds
 `
 
 func usage() {
 	fmt.Print(usages)
 	os.Exit(1)
 }
+
+var silence bool
 
 func main() {
 	var timerLen, timerCountUntil, interm string
@@ -42,6 +45,7 @@ func main() {
 	flag.BoolVar(&showVersion, "v", false, "Show version")
 	flag.StringVar(&timerLen, "p", "45m", "pomodoro timer length")
 	flag.StringVar(&interm, "b", "10m", "break length")
+	flag.BoolVar(&silence, "s", false, "silence")
 	flag.Usage = usage
 	flag.Parse()
 
