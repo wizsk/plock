@@ -154,7 +154,7 @@ loop:
 			}
 
 			if isQuit(ev) {
-				if !confirm(a.queues, "Do you really want to quit?") {
+				if !confirm(a.queues, "Do you really want to quit?", false) {
 					continue loop
 				}
 
@@ -166,7 +166,7 @@ loop:
 				if a.nextInterm {
 					next = "the session?"
 				}
-				if !confirm(a.queues, "Do you really want to skip "+next+" remaining: "+a.current.String()) {
+				if !confirm(a.queues, "Do you really want to skip "+next+" remaining: "+a.current.String(), true) {
 					continue loop
 				}
 

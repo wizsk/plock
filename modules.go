@@ -2,17 +2,16 @@ package main
 
 import "github.com/nsf/termbox-go"
 
-func confirm(q <-chan termbox.Event, msg string) bool {
+func confirm(q <-chan termbox.Event, msg string, ySelected bool) bool {
 	if len(msg) == 0 {
 		return false
 	}
 
-	const yt = "yes"
-	const nt = "no"
+	const yt = "Yes"
+	const nt = "No"
 	const ntOffset = 10
 	const yDistence = 2 // from the text to yes no
 
-	ySelected := true
 	// for the msg
 	var of, oft int
 	xOffset := len(msg) / 2

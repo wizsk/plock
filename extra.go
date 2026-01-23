@@ -60,7 +60,9 @@ loop:
 			inputTime := time.Now()
 			if inputTime.Sub(lastInput) > inputDelay {
 				if isQuit(ev) {
-					break loop
+					if confirm(queues, "Stop timmer?", false) {
+						break loop
+					}
 				} else if ev.Ch == 'r' || ev.Ch == 'R' {
 					duration = time.Duration(0)
 					clearT()
