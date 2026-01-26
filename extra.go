@@ -52,6 +52,40 @@ func timer(limit time.Duration) {
 	end := time.Now().Add(limit)
 	paused := false
 	nowTime := time.Now()
+	update := func() bool {
+		if !paused {
+			duration += time.Second
+
+		}
+		nowTime = nowTime.Add(time.Second)
+
+		clearT()
+		putTime(durationToStr(duration))
+		putText( /* "Current time: "+ */ nowTime.Format(timeFormat), positionButtom, termbox.ColorDarkGray+termbox.AttrBold)
+
+		if paused {
+			putText("Paused", positionButtomP1,
+				termbox.AttrBold+termbox.ColorRed)
+		} else if limit != 0 {
+			putText(
+				fmt.Sprintf("Timmer ends: %s", end.Format(timeFormat)),
+				positionButtomP1,
+				termbox.ColorDarkGray+termbox.AttrBold,
+			)
+		}
+
+		flush()
+
+		if limit != 0 && duration >= limit {
+			if !silence {
+				go notify("Time out", fmt.Sprintf("%s is over", limit.String()))
+				go playSound(writeNoti())
+			}
+			time.Sleep(time.Second)
+			return true // break
+		}
+		return false
+	}
 
 loop:
 	for {
@@ -73,39 +107,12 @@ loop:
 					if !paused {
 						end = time.Now().Add(limit - duration)
 					}
+					update()
 				}
 			}
 			lastInput = inputTime
 		case <-ticker.C:
-			if !paused {
-				duration += time.Second
-
-			}
-			nowTime = nowTime.Add(time.Second)
-
-			clearT()
-			putTime(durationToStr(duration))
-			putText( /* "Current time: "+ */ nowTime.Format(timeFormat), positionButtom, termbox.ColorDarkGray+termbox.AttrBold)
-
-			if paused {
-				putText("Paused", positionButtomP1,
-					termbox.AttrBold+termbox.ColorRed)
-			} else if limit != 0 {
-				putText(
-					fmt.Sprintf("Timmer ends: %s", end.Format(timeFormat)),
-					positionButtomP1,
-					termbox.ColorDarkGray+termbox.AttrBold,
-				)
-			}
-
-			flush()
-
-			if limit != 0 && duration >= limit {
-				if !silence {
-					go notify("Time out", fmt.Sprintf("%s is over", limit.String()))
-					go playSound(writeNoti())
-				}
-				time.Sleep(time.Second)
+			if update() {
 				break loop
 			}
 		}
