@@ -201,19 +201,27 @@ loop:
 		case <-a.ticker.C:
 			if a.current == 0 {
 				if a.nextInterm {
-					go playSound(a.notiPath)
-					go notify(fmt.Sprintf("Session %d done", a.session), "Go do some exercise")
+					if !silence {
+						go playSound(a.notiPath)
+					}
+					if showNotifications {
+						go notify(fmt.Sprintf("Session %d done", a.session), "Go do some exercise")
+					}
 					a.current = a.intermission
 					a.nextInterm = false
 
 				} else {
 					a.current = a.timmer
 					a.session++
-					go notify("Break finised", "Comeback and contine working")
+					if showNotifications {
+						go notify("Break finised", "Comeback and contine working")
+					}
 					clearT()
 					putText("Press any key to continue or q to quit...", positionMiddle, termbox.ColorLightRed+termbox.AttrBold)
 					flush()
-					go playSound(a.notiPath)
+					if !silence {
+						go playSound(a.notiPath)
+					}
 
 					if ev := <-a.queues; isQuit(ev) {
 						break loop

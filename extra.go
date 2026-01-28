@@ -77,8 +77,10 @@ func timer(limit time.Duration) {
 		flush()
 
 		if limit != 0 && duration >= limit {
-			if !silence {
+			if showNotifications {
 				go notify("Time out", fmt.Sprintf("%s is over", limit.String()))
+			}
+			if !silence {
 				go playSound(writeNoti())
 			}
 			time.Sleep(time.Second)
