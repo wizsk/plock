@@ -98,7 +98,7 @@ loop:
 						break loop
 					}
 				} else if ev.Ch == 'r' || ev.Ch == 'R' {
-					duration = time.Duration(0)
+					duration = time.Duration(time.Second * -1)
 					clearT()
 					putText("Reseting...", positionMiddle, termbox.ColorRed+termbox.AttrBold)
 					flush()
