@@ -63,16 +63,17 @@ loop:
 
 		flush()
 
-		select {
-		case ev := <-q:
-			if /* ev.Ch == 'q' || */ ev.Key == termbox.KeyEnter || ev.Key == termbox.KeyCtrlC {
-				clearT()
-				break loop
-			} else if ev.Type == termbox.EventResize {
-				continue loop
-			} else {
-				ySelected = !ySelected
-			}
+		ev := <-q
+		if /* ev.Ch == 'q' || */ ev.Key == termbox.KeyEnter || ev.Key == termbox.KeyCtrlC {
+			clearT()
+			break loop
+		} else if ev.Type == termbox.EventResize {
+			continue loop
+		} else if ev.Key == termbox.KeyEsc {
+			ySelected = false
+			break loop
+		} else {
+			ySelected = !ySelected
 		}
 	}
 
