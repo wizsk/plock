@@ -51,12 +51,16 @@ func writeNoti() string {
 
 func warnAboutDependencies() {
 	const cmdNotFound = "command %q not found, please install it to get %s\n"
-	if _, err := exec.LookPath("mpv"); err != nil {
-		fmt.Fprintf(os.Stderr, cmdNotFound, "mpv", "allart sounds")
+	if !silence {
+		if _, err := exec.LookPath("mpv"); err != nil {
+			fmt.Fprintf(os.Stderr, cmdNotFound, "mpv", "allart sounds")
+		}
 	}
-	if runtime.GOOS == "linux" {
-		if _, err := exec.LookPath("notify-send"); err != nil {
-			fmt.Fprintf(os.Stderr, cmdNotFound, "notify-send", "notifications")
+	if showNotifications {
+		if runtime.GOOS == "linux" {
+			if _, err := exec.LookPath("notify-send"); err != nil {
+				fmt.Fprintf(os.Stderr, cmdNotFound, "notify-send", "notifications")
+			}
 		}
 	}
 }
