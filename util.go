@@ -90,6 +90,10 @@ func playSound(path string) {
 
 // durationToStr formats the app.current to "MM:SS" or "HH:MM:SS"
 func durationToStr(d time.Duration) string {
+	if d < 0 {
+		d = 0
+	}
+
 	d = d.Round(time.Second)
 	h := d / time.Hour
 	d -= h * time.Hour

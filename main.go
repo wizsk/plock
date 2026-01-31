@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/nsf/termbox-go"
@@ -12,9 +13,10 @@ import (
 const (
 	timeFormat string = "03:04:05 PM"
 	version    string = "1.2"
+	defFPS            = 30
 )
 
-const usages string = `Usage of plock [<session len> <break>] [OPTIONS..]:
+var usages string = `Usage of plock [<session len> <break>] [OPTIONS..]:
 A small pomodoro clock from the terminal
 
 OPTIONS:
@@ -26,6 +28,7 @@ OPTIONS:
   -e  don't show "Ends at: ` + timeFormat + `"
   -s  silence. play no sounds
   -n  show notifications
+  -f  fps (default: ` + strconv.Itoa(defFPS) + `)
 `
 
 func usage() {
@@ -33,7 +36,11 @@ func usage() {
 	os.Exit(1)
 }
 
-var silence, showNotifications bool
+var (
+	silence, showNotifications bool
+	showFps                    bool
+	fpsFlag                    uint
+)
 
 func main() {
 	var timerLen, timerCountUntil, interm string
@@ -48,6 +55,8 @@ func main() {
 	flag.StringVar(&interm, "b", "10m", "break length")
 	flag.BoolVar(&silence, "s", false, "silence")
 	flag.BoolVar(&showNotifications, "n", false, "silence")
+	flag.UintVar(&fpsFlag, "f", defFPS, "silence")
+	flag.BoolVar(&showFps, "sf", false, "show fps")
 	flag.Usage = usage
 	flag.Parse()
 
