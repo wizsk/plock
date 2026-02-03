@@ -12,7 +12,7 @@ import (
 
 const (
 	timeFormat string = "03:04:05 PM"
-	version    string = "1.3"
+	version    string = "1.4"
 	defFPS            = 30
 )
 
