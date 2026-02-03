@@ -98,13 +98,14 @@ loop:
 			if inputTime.Sub(lastInput) > inputDelay {
 				if isQuit(ev) {
 					timmerTicker.Stop()
-					if confirm(queues, "Stop timmer?", false) {
+					if confirm(queues, "Stop timmer?", true) {
 						break loop
 					}
 					timmerTicker.Reset(time.Second)
 				} else if ev.Ch == 'r' || ev.Ch == 'R' {
 					duration.Store(0)
 					timmerTicker.Reset(time.Second)
+					paused = false
 					updateScreen()
 				} else if ev.Key == termbox.KeySpace {
 					paused = !paused
