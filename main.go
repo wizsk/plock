@@ -25,6 +25,7 @@ OPTIONS:
   -c  clock mode
   -t  timer mode or count up form 0 seconds
   -u  timer mode or count up form 0 seconds until specified time. eg. (1m30s, 3:04PM or 15:04)
+  -d  Countdown mode
   -e  don't show "Ends at: ` + timeFormat + `"
   -s  silence. play no sounds
   -n  show notifications
@@ -43,19 +44,26 @@ var (
 )
 
 func main() {
-	var timerLen, timerCountUntil, interm string
+	var timerLen, timerCountUntil, countDown, interm string
 	var clcokMode, timerMode, showEndTime, showVersion bool
 
 	flag.BoolVar(&clcokMode, "c", false, "clock mode")
+
 	flag.BoolVar(&timerMode, "t", false, "timer mode or count up form 0 seconds")
-	flag.StringVar(&timerCountUntil, "u", "", "timer mode or count up form 0 seconds until specified time.")
-	flag.BoolVar(&showEndTime, "e", false, "don't show ends at")
-	flag.BoolVar(&showVersion, "v", false, "Show version")
+	flag.StringVar(&timerCountUntil, "u", "", "timer mode or count up form 0 seconds until specified time. eg. (1m30s, 3:04PM or 15:04)")
+	flag.StringVar(&countDown, "d", "", "countdown mode. format: 1m30s, 3:04PM or 15:04")
+
+	flag.BoolVar(&showEndTime, "e", false, `don't show "Ends at: `+timeFormat+`"`)
+
+	flag.BoolVar(&showVersion, "v", false, "show version and exit")
+
 	flag.StringVar(&timerLen, "p", "45m", "pomodoro timer length")
 	flag.StringVar(&interm, "b", "10m", "break length")
-	flag.BoolVar(&silence, "s", false, "silence")
-	flag.BoolVar(&showNotifications, "n", false, "silence")
-	flag.UintVar(&fpsFlag, "f", defFPS, "silence")
+
+	flag.BoolVar(&silence, "s", false, "silence. play no sounds")
+	flag.BoolVar(&showNotifications, "n", false, "show notifications")
+
+	flag.UintVar(&fpsFlag, "f", defFPS, "Set fps")
 	flag.BoolVar(&showFps, "sf", false, "show fps")
 	flag.Usage = usage
 	flag.Parse()
@@ -83,23 +91,33 @@ func main() {
 	}
 
 	if timerMode {
-		timer(time.Duration(0))
+		timer(time.Duration(0), false)
 		return
 	}
 
+	cDown := false
+	duration := ""
 	if timerCountUntil != "" {
-		d, err := time.ParseDuration(timerCountUntil)
+		duration = timerCountUntil
+	} else if countDown != "" {
+		duration = countDown
+		cDown = true
+	}
+
+	if duration != "" {
+		d, err := time.ParseDuration(duration)
 		if err != nil {
-			d, err = parseTime(timerCountUntil)
+			d, err = parseTime(duration)
 		}
 		if err != nil {
 			termbox.Close()
 			fmt.Println(err)
 			fmt.Println()
-			usage()
+			flag.Usage()
+			os.Exit(1)
 		}
 
-		timer(d)
+		timer(d, cDown)
 		return
 	}
 

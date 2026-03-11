@@ -53,7 +53,7 @@ func warnAboutDependencies() {
 	const cmdNotFound = "command %q not found, please install it to get %s\n"
 	if !silence {
 		if _, err := exec.LookPath("mpv"); err != nil {
-			fmt.Fprintf(os.Stderr, cmdNotFound, "mpv", "allart sounds")
+			fmt.Fprintf(os.Stderr, cmdNotFound, "mpv", "alert sounds")
 		}
 	}
 	if showNotifications {
