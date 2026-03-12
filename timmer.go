@@ -32,6 +32,8 @@ func timer(limit time.Duration, down bool) {
 	updateScreenCalled := 0
 	var updateScreenFirstCalled time.Time
 	var timeElapes int
+
+	timmerDone := false
 	updateScreen := func() bool {
 		clearT()
 		now := time.Now()
@@ -67,6 +69,7 @@ func timer(limit time.Duration, down bool) {
 		flush()
 
 		if down && dur <= 0 || !down && limit != 0 && dur >= limit {
+			timmerDone = true
 			if showNotifications {
 				go notify("Time out", fmt.Sprintf("%s is over", limit.String()))
 			}
@@ -76,7 +79,7 @@ func timer(limit time.Duration, down bool) {
 			time.Sleep(time.Second)
 			return true // break
 		}
-		return false
+		return timmerDone
 	}
 
 	timerDone := make(chan struct{})
@@ -109,11 +112,20 @@ loop:
 						break loop
 					}
 					timmerTicker.Reset(time.Second)
-				} else if ev.Ch == 'r' || ev.Ch == 'R' {
-					duration.Store(0)
-					timmerTicker.Reset(time.Second)
-					paused = false
-					updateScreen()
+				} else if ev.Ch == 'r' || ev.Ch == 'ق' {
+					if confirm(queues, "Reset timmer?", true) {
+						timmerTicker.Stop()
+
+						if down {
+							duration.Store(int64(limit))
+						} else {
+							duration.Store(0)
+						}
+
+						timmerTicker.Reset(time.Second)
+						paused = false
+						updateScreen()
+					}
 				} else if ev.Key == termbox.KeySpace {
 					paused = !paused
 					timmerTicker.Stop()

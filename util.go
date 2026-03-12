@@ -66,7 +66,8 @@ func warnAboutDependencies() {
 }
 
 func isQuit(ev termbox.Event) bool {
-	return ev.Ch == 'q' || ev.Ch == 'Q' || ev.Key == termbox.KeyEsc || ev.Key == termbox.KeyCtrlC
+	return ev.Ch == 'q' || ev.Ch == 'Q' || ev.Ch == 'ض' ||
+		ev.Key == termbox.KeyEsc || ev.Key == termbox.KeyCtrlC
 }
 
 func notify(heading, description string) {
