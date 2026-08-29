@@ -187,7 +187,7 @@ loop:
 				clearT()
 				a.paused = !a.paused
 				if a.paused {
-					putTime(a.formatDuration())
+					putTime(a.formatDuration(), 0)
 					putText("Paused", positionButtom, termbox.ColorLightRed+termbox.AttrBold)
 					a.ticker.Stop()
 				} else {
@@ -236,7 +236,7 @@ loop:
 			if a.showFinisesAt {
 				putText("Ends at: "+time.Now().Add(a.current).Format(timeFormat), positionButtomP1, termbox.ColorDarkGray+termbox.AttrBold)
 			}
-			putTime(a.formatDuration())
+			putTime(a.formatDuration(), 0)
 			a.current -= time.Second
 			if !a.nextInterm {
 				putText(a.printNextSession(), positionButtom, termbox.ColorLightBlue+termbox.AttrBold)

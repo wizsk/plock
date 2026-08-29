@@ -23,6 +23,11 @@ func timer(limit time.Duration, down bool) {
 
 	ticker := time.NewTicker(time.Second / time.Duration(fpsFlag)) // 30fps
 
+	extralines := 4
+	if limit == 0 {
+		extralines = 2
+	}
+
 	duration := atomic.Int64{}
 	if down {
 		duration.Store(int64(limit))
@@ -50,14 +55,17 @@ func timer(limit time.Duration, down bool) {
 			}
 		}
 		dur := time.Duration(duration.Load())
-		putTime(durationToStr(dur))
+
+		nextY := putTime(durationToStr(dur), extralines) + 1
 
 		// "Current time: "
 		// putText(now.Format(timeFormat),
 		// 	positionButtom, termbox.ColorDarkGray|termbox.AttrBold)
 
-		if limit > 0 {
-			tsx, tsy := termbox.Size()
+		if limit == 0 {
+			nextY++
+		} else {
+			tsx, _ := termbox.Size()
 
 			s := 100
 
@@ -65,7 +73,9 @@ func timer(limit time.Duration, down bool) {
 				s = tsx - 20
 			}
 
-			y := tsy*3/4 - 1
+			y := nextY
+			nextY += 2
+
 			x := tsx/2 - s/2
 			du := float64(duration.Load())
 			lim := float64(limit)
@@ -91,12 +101,12 @@ func timer(limit time.Duration, down bool) {
 		}
 
 		if paused {
-			putText("Paused", positionButtomP1,
+			putTextY("Paused", nextY,
 				termbox.AttrBold+termbox.ColorRed)
 		} else if limit != 0 {
-			putText(
+			putTextY(
 				fmt.Sprintf("Timmer ends: %s", end.Format(timeFormat)),
-				positionButtomP1,
+				nextY,
 				termbox.ColorDarkGray+termbox.AttrBold,
 			)
 		}

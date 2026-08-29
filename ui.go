@@ -8,10 +8,10 @@ import (
 )
 
 // put time in the middle
-func putTime(s string) {
+func putTime(s string, extraLines int) int {
 	t := toText(s)
 	x, y := termbox.Size()
-	x, y = x/2-t.width()/2, y/2-t.height()/2 // middle
+	x, y = (x/2)-(t.width()/2), (y/2)-((t.height()+extraLines)/2) // middle
 
 	lx := x // last x
 	for h := 0; h < t.height(); h++ {
@@ -24,6 +24,8 @@ func putTime(s string) {
 		y++
 		x = lx
 	}
+
+	return y
 }
 
 func putMsg(m symbol, color termbox.Attribute) {
@@ -65,6 +67,15 @@ func putText(t string, p position, color termbox.Attribute) {
 		return
 	}
 
+	for _, r := range t {
+		termbox.SetCell(x, y, r, color, termbox.ColorDefault)
+		x++
+	}
+}
+
+func putTextY(t string, y int, color termbox.Attribute) {
+	x, _ := termbox.Size()
+	x = x/2 - utf8.RuneCountInString(t)/2
 	for _, r := range t {
 		termbox.SetCell(x, y, r, color, termbox.ColorDefault)
 		x++

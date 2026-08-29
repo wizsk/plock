@@ -29,7 +29,7 @@ loop:
 			lastInput = inputTime
 		case t := <-ticker.C:
 			clearT()
-			putTime(t.Format(timeFormat))
+			putTime(t.Format(timeFormat), 0)
 			flush()
 		}
 
