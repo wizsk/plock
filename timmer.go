@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"sync/atomic"
 	"time"
@@ -52,8 +53,42 @@ func timer(limit time.Duration, down bool) {
 		putTime(durationToStr(dur))
 
 		// "Current time: "
-		putText(now.Format(timeFormat),
-			positionButtom, termbox.ColorDarkGray|termbox.AttrBold)
+		// putText(now.Format(timeFormat),
+		// 	positionButtom, termbox.ColorDarkGray|termbox.AttrBold)
+
+		if limit > 0 {
+			tsx, tsy := termbox.Size()
+
+			s := 100
+
+			if s > tsx {
+				s = tsx - 20
+			}
+
+			y := tsy*3/4 - 1
+			x := tsx/2 - s/2
+			du := float64(duration.Load())
+			lim := float64(limit)
+			if down {
+				du = lim - du
+			}
+
+			doneUntil := int(math.Round(du / lim * float64(s)))
+			logFa(time.Duration(duration.Load()), limit)
+
+			const doneChar = '█'
+			const notDoneChar = '░'
+			const doneColor = termbox.ColorRed
+			const notDoneColor = termbox.ColorDarkGray
+			for range doneUntil {
+				termbox.SetCell(x, y, doneChar, doneColor, termbox.ColorDefault)
+				x++
+			}
+			for range s - doneUntil {
+				termbox.SetCell(x, y, notDoneChar, notDoneColor, termbox.ColorDefault)
+				x++
+			}
+		}
 
 		if paused {
 			putText("Paused", positionButtomP1,

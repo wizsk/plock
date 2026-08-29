@@ -129,3 +129,25 @@ func parseTime(date string) (time.Duration, error) {
 
 	return duration, err
 }
+
+func logF(format string, args ...any) {
+	f, err := os.OpenFile("/tmp/plock.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	fm := time.Now().Format(time.DateTime) + ": " + format + "\n"
+	fmt.Fprintf(f, fm, args...)
+}
+
+func logFa(args ...any) {
+	f, err := os.OpenFile("/tmp/plock.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	fm := time.Now().Format(time.DateTime) + ":"
+	a := []any{fm}
+	a = append(a, args...)
+	fmt.Fprintln(f, a...)
+}

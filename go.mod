@@ -1,6 +1,6 @@
 module github.com/wizsk/plock
 
-go 1.21.5
+go 1.26
 
 require github.com/nsf/termbox-go v1.1.1
 
