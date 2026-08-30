@@ -63,32 +63,33 @@ func timer(limit time.Duration, down bool) {
 		// 	positionButtom, termbox.ColorDarkGray|termbox.AttrBold)
 
 		if limit == 0 {
-			nextY++
+			// nextY++
 		} else {
 			tsx, _ := termbox.Size()
 
 			s := 100
 
 			if s > tsx {
-				s = tsx - 20
+				s = tsx - 10
 			}
 
 			y := nextY
 			nextY += 2
 
 			x := tsx/2 - s/2
-			du := float64(duration.Load())
+			du := float64(dur)
 			lim := float64(limit)
+
 			if down {
 				du = lim - du
 			}
 
 			doneUntil := int(math.Round(du / lim * float64(s)))
-			logFa(time.Duration(duration.Load()), limit)
+			// logFa(time.Duration(duration.Load()), limit)
 
 			const doneChar = '█'
 			const notDoneChar = '░'
-			const doneColor = termbox.ColorRed
+			const doneColor = termbox.ColorWhite
 			const notDoneColor = termbox.ColorDarkGray
 			for range doneUntil {
 				termbox.SetCell(x, y, doneChar, doneColor, termbox.ColorDefault)
@@ -105,7 +106,13 @@ func timer(limit time.Duration, down bool) {
 				termbox.AttrBold+termbox.ColorRed)
 		} else if limit != 0 {
 			putTextY(
-				fmt.Sprintf("Timmer ends: %s", end.Format(timeFormat)),
+				fmt.Sprintf("%s | Ends: %s", now.Format(timeFormat), end.Format(timeFormat)),
+				nextY,
+				termbox.ColorDarkGray+termbox.AttrBold,
+			)
+		} else {
+			putTextY(
+				now.Format(timeFormat),
 				nextY,
 				termbox.ColorDarkGray+termbox.AttrBold,
 			)

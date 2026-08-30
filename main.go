@@ -12,7 +12,7 @@ import (
 
 const (
 	timeFormat string = "03:04:05 PM"
-	version    string = "1.4"
+	version    string = "1.5"
 	defFPS            = 30
 )
 
@@ -29,7 +29,7 @@ OPTIONS:
   -e  don't show "Ends at: ` + timeFormat + `"
   -s  silence. play no sounds
   -n  show notifications
-  -f  fps (default: ` + strconv.Itoa(defFPS) + `)
+  -sf  fps (default: ` + strconv.Itoa(defFPS) + `)
 `
 
 func usage() {
