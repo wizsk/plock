@@ -14,6 +14,11 @@ const (
 	timeFormat string = "03:04:05 PM"
 	version    string = "1.5"
 	defFPS            = 30
+
+	timmerProgDoneCharDef     = '█'
+	timmerProgNotDoneCharDef  = '░'
+	timmerProgDoneColorDef    = termbox.ColorWhite
+	timmerProgNotDoneColorDef = termbox.ColorDarkGray
 )
 
 var usages string = `Usage of plock [<session len> <break>] [OPTIONS..]:
@@ -29,7 +34,14 @@ OPTIONS:
   -e  don't show "Ends at: ` + timeFormat + `"
   -s  silence. play no sounds
   -n  show notifications
-  -sf  fps (default: ` + strconv.Itoa(defFPS) + `)
+  -f  set fps (default: ` + strconv.Itoa(defFPS) + `)
+  -sf
+        show avg fps
+  -prog
+        Timmer progress done symbol (default: "` + string(timmerProgNotDoneCharDef) + `")
+  -prog-rem
+        Timmer progress remaining symbol (default: "` + string(timmerProgDoneCharDef) + `")
+
 `
 
 func usage() {
@@ -41,6 +53,9 @@ var (
 	silence, showNotifications bool
 	showFps                    bool
 	fpsFlag                    uint
+
+	timmerProgDoneChar    rune
+	timmerProgNotDoneChar rune
 )
 
 func main() {
@@ -65,8 +80,22 @@ func main() {
 
 	flag.UintVar(&fpsFlag, "f", defFPS, "Set fps")
 	flag.BoolVar(&showFps, "sf", false, "show fps")
+
+	var tmDone, tmNotDone string
+	flag.StringVar(&tmDone, "prog", string(timmerProgDoneCharDef), "Timmer progress done symbol")
+	flag.StringVar(&tmNotDone, "prog-rem", string(timmerProgNotDoneCharDef), "Timmer progress remaining symbol")
+
 	flag.Usage = usage
 	flag.Parse()
+
+	tmDoneRune, tmNotDoneRune := []rune(tmDone), []rune(tmNotDone)
+	if len(tmDoneRune) > 1 || len(tmNotDoneRune) > 1 {
+		fmt.Printf("done-char or nondone-char can not be more than 1 char long, have %q, %q\n", tmDone, tmNotDone)
+		os.Exit(1)
+	}
+
+	timmerProgDoneChar = tmDoneRune[0]
+	timmerProgNotDoneChar = tmNotDoneRune[0]
 
 	if showVersion {
 		fmt.Println(version)

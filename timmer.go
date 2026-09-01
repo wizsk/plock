@@ -87,16 +87,12 @@ func timer(limit time.Duration, down bool) {
 			doneUntil := int(math.Round(du / lim * float64(s)))
 			// logFa(time.Duration(duration.Load()), limit)
 
-			const doneChar = '█'
-			const notDoneChar = '░'
-			const doneColor = termbox.ColorWhite
-			const notDoneColor = termbox.ColorDarkGray
 			for range doneUntil {
-				termbox.SetCell(x, y, doneChar, doneColor, termbox.ColorDefault)
+				termbox.SetCell(x, y, timmerProgDoneChar, timmerProgDoneColorDef, termbox.ColorDefault)
 				x++
 			}
 			for range s - doneUntil {
-				termbox.SetCell(x, y, notDoneChar, notDoneColor, termbox.ColorDefault)
+				termbox.SetCell(x, y, timmerProgNotDoneChar, timmerProgNotDoneColorDef, termbox.ColorDefault)
 				x++
 			}
 		}
